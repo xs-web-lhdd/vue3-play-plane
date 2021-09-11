@@ -1,0 +1,22 @@
+{
+  "name": "game-plane",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "build": "webpack",
+    "serve": "webpack-dev-server --open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "@vue/runtime-core": "^3.2.11",
+    "pixi.js": "^6.1.2",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
