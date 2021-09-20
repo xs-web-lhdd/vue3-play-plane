@@ -7,7 +7,17 @@ import startBtnImg from '../assets/startBtn.png'
 
 
 export default defineComponent({
-  render() {
+  setup(props, context) {
+    // 作为 vue3 入口函数：
+    const onClick = () => {
+      console.log('click');
+      context.emit('changePage', "GamePage")
+    }
+    return {
+      onClick
+    }
+  },
+  render(context) {
     // 背景图片：
     // <div><img src="imgPath"/></div>
     // 使用pixi.js
@@ -17,7 +27,9 @@ export default defineComponent({
       h('Sprite', {
         texture: startBtnImg,
         x: 227,
-        y: 515
+        y: 515,
+        interactive: true,
+        onClick: context.onClick
       })
     ])
     return
