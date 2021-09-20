@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "@vue/runtime-core": "^3.2.11",
+    "file-loader": "^6.2.0",
     "pixi.js": "^6.1.2",
+    "url-loader": "^4.1.1",
     "webpack-dev-server": "^3.11.0"
   }
 }

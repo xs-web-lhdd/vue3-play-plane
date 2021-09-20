@@ -2,29 +2,23 @@ import {
   createRenderer
 } from '@vue/runtime-core'
 import {
-  Graphics,
-  Text
+  Text,
+  Container,
+  Sprite,
+  Texture
 } from 'pixi.js'
 
 const renderer = createRenderer({
 
   createElement(type) {
-    console.log(type);
-    // 绘制一个 矩形
-    // pixi.js
     let element
-    if (type === 'rect') {
-      // 创制一个矩形
-      element = new Graphics()
-      element.beginFill(0xff0000)
-      element.drawRect(0, 0, 500, 500)
-      element.endFill()
-    } else if (type === 'circle') {
-      // 创建一个圆
-      element = new Graphics()
-      element.beginFill(0xffff00)
-      element.drawCircle(0, 0, 50)
-      element.endFill()
+    switch (type) {
+      case 'Container':
+        element = new Container()
+        break;
+      case 'Sprite':
+        element = new Sprite()
+        break;
     }
     return element
   },
@@ -37,7 +31,14 @@ const renderer = createRenderer({
   },
   patchProp(el, key, prevValue, nextValue) {
     // pixi设置元素坐标：
-    el[key] = nextValue
+    switch (key) {
+      case 'texture':
+        el.texture = Texture.from(nextValue)
+        break;
+      default:
+        el[key] = nextValue
+        break;
+    }
   },
   insert(el, parent) {
     console.log(el);

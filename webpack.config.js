@@ -12,14 +12,14 @@ module.exports = {
   },
   module: {
     rules: [{
-      test: /\.(png|jpe?g|gif)$/i,
+      test: /\.(png|jpg|gif)$/i,
       use: [{
-        loader: 'file-loader',
-        option: {
-          outputPath: 'assets/',
-          publicPath: ''
+        loader: 'url-loader',
+        options: {
+          limit: 8192,
         }
-      }]
-    }]
+      }, ],
+      type: 'javascript/auto'
+    }, ]
   }
 }
