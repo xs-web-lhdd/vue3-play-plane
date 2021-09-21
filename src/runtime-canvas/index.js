@@ -44,8 +44,6 @@ const renderer = createRenderer({
     }
   },
   insert(el, parent) {
-    console.log(el);
-    console.log(parent);
     parent.addChild(el);
   },
   // 处理注释：

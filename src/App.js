@@ -45,6 +45,7 @@ export default defineComponent({
     }
   },
   render(context) {
+    console.log(context.currentPageName);
     return h('Container', [h(context.currentPage, {
       onChangePage(page) {
         context.currentPageName = page
