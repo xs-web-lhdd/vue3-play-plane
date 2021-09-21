@@ -6,13 +6,22 @@ import {
 // map：
 import Map from '../components/Map'
 import Plane from '../components/Plane'
+import EnemyPlane from '../components/EnemyPlane'
+import {
+  game
+} from '../runtime-canvas/game'
+import {
+  hitTestObject
+} from '../utils/index'
 
 
 function useCreatePlane() {
   // 响应式对象：
   const planeInfo = reactive({
     x: 150,
-    y: 150
+    y: 450,
+    with: 258,
+    height: 364
   })
   // 速度
   const speed = 15
@@ -20,15 +29,19 @@ function useCreatePlane() {
   window.addEventListener('keydown', function (e) {
     switch (e.code) {
       case 'ArrowUp':
+        if (planeInfo.y <= 0) return
         planeInfo.y -= speed
         break;
       case 'ArrowDown':
+        if (planeInfo.y >= 720) return
         planeInfo.y += speed
         break;
       case 'ArrowLeft':
+        if (planeInfo.x <= 0) return
         planeInfo.x -= speed
         break;
       case 'ArrowRight':
+        if (planeInfo.x >= 480) return
         planeInfo.x += speed
         break;
       default:
@@ -42,19 +55,50 @@ function useCreatePlane() {
 
 export default defineComponent({
   setup() {
+    // 我方飞机：
     const {
       planeInfo
     } = useCreatePlane()
+    // 敌方飞机：
+    const enemyPlanes = reactive([{
+      x: 50,
+      y: 0,
+      with: 308,
+      height: 207
+    }])
+    game.ticker.add(() => {
+      // 敌方飞机移动：
+      enemyPlanes.forEach(enemyPlane => {
+        enemyPlane.y++
+      })
+      // 碰撞检测的算法： 矩形碰撞
+      enemyPlanes.forEach(enemyPlane => {
+        if (hitTestObject(enemyPlane, planeInfo)) {
+          console.log('完蛋了，碰到上了');
+          // 游戏结束：
+        }
+        console.log(hitTestObject(enemyPlane, planeInfo));
+      })
+    })
     return {
-      planeInfo
+      planeInfo,
+      enemyPlanes
     }
   },
   render(context) {
+    // 敌方飞机：
+    const createEnemyPlane = () => {
+      return context.enemyPlanes.map(enemyPlane => {
+        return h(EnemyPlane, {
+          x: enemyPlane.x,
+          y: enemyPlane.y
+        })
+      })
+    }
     // 地图，飞机
     return h('Container', [h(Map), h(Plane, {
       x: context.planeInfo.x,
       y: context.planeInfo.y
-    })])
-    return
+    }), ...createEnemyPlane()])
   }
 })
