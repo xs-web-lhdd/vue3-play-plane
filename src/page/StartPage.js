@@ -10,7 +10,6 @@ export default defineComponent({
   setup(props, context) {
     // 作为 vue3 入口函数：
     const onClick = () => {
-      console.log('click');
       context.emit('changePage', "GamePage")
     }
     return {
