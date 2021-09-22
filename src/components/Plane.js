@@ -3,9 +3,17 @@ import {
   defineComponent,
   watch,
   reactive,
-  toRefs
+  toRefs,
+  onMounted,
+  onUnmounted
 } from '@vue/runtime-core'
 import planeImg from '../assets/plane.png'
+import {
+  game
+} from '../runtime-canvas/game'
+import {
+  useKeyboard
+} from '../use/index'
 
 
 export default defineComponent({
@@ -39,16 +47,17 @@ export default defineComponent({
     // }
 
     // 按下空格键发射子弹：
-    window.addEventListener('keydown', function (e) {
-      if (e.code === 'Space') {
-        console.log('要发射子弹咯！');
-        // 子弹初始坐标跟飞机当前坐标一致：
-        context.emit('attack', {
-          x: x.value + 100,
-          y: y.value
-        })
-      }
-    })
+    // window.addEventListener('keydown', function (e) {
+    //   if (e.code === 'Space') {
+    //     console.log('要发射子弹咯！');
+    //     // 子弹初始坐标跟飞机当前坐标一致：
+    //     context.emit('attack', {
+    //       x: x.value + 100,
+    //       y: y.value
+    //     })
+    //   }
+    // })
+    useAttackHandler(context, x, y)
     return {
       x,
       y
@@ -65,3 +74,53 @@ export default defineComponent({
     ])
   }
 })
+
+
+function useAttackHandler(ctx, x, y) {
+  let isAttack = false;
+  // 攻击间隔时间
+  const ATTACK_INTERVAL = 10;
+
+  let startTime = 0;
+
+  const handleTicker = () => {
+    if (isAttack) {
+      startTime++;
+      if (startTime > ATTACK_INTERVAL) {
+        emitAttack();
+        startTime = 0;
+      }
+    }
+  };
+
+  onMounted(() => {
+    game.ticker.add(handleTicker);
+  });
+
+  onUnmounted(() => {
+    game.ticker.remove(handleTicker);
+  });
+
+  const emitAttack = () => {
+    ctx.emit("attack", {
+      x: x.value + 110,
+      y: y.value + 0,
+    });
+  };
+
+  const startAttack = () => {
+    isAttack = true;
+    startTime = 100;
+  };
+
+  const stopAttack = () => {
+    isAttack = false;
+  };
+
+  useKeyboard({
+    Space: {
+      keydown: startAttack,
+      keyup: stopAttack,
+    },
+  });
+}
