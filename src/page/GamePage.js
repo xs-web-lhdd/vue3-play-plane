@@ -1,7 +1,9 @@
 import {
   h,
   defineComponent,
-  reactive
+  reactive,
+  onUnmounted,
+  onMounted
 } from '@vue/runtime-core'
 // map：
 import Map from '../components/Map'
@@ -14,13 +16,13 @@ import {
   hitTestObject
 } from '../utils/index'
 
-
+// 我方飞机：
 function useCreatePlane() {
   // 响应式对象：
   const planeInfo = reactive({
     x: 150,
     y: 450,
-    with: 258,
+    width: 258,
     height: 364
   })
   // 速度
@@ -53,20 +55,32 @@ function useCreatePlane() {
   }
 }
 
+// 敌方飞机：
+function useEnemyPlane() {
+  const enemyPlanes = reactive([{
+    x: 50,
+    y: 0,
+    width: 308,
+    height: 207
+  }])
+  return {
+    enemyPlanes
+  }
+}
+
 export default defineComponent({
-  setup() {
+  setup(props, context) {
     // 我方飞机：
     const {
       planeInfo
     } = useCreatePlane()
     // 敌方飞机：
-    const enemyPlanes = reactive([{
-      x: 50,
-      y: 0,
-      with: 308,
-      height: 207
-    }])
-    game.ticker.add(() => {
+    const {
+      enemyPlanes
+    } = useEnemyPlane()
+
+    // 飞机移动逻辑：
+    const handleTicker = () => {
       // 敌方飞机移动：
       enemyPlanes.forEach(enemyPlane => {
         enemyPlane.y++
@@ -76,9 +90,16 @@ export default defineComponent({
         if (hitTestObject(enemyPlane, planeInfo)) {
           console.log('完蛋了，碰到上了');
           // 游戏结束：
+          context.emit('changePage', 'EndPage')
         }
-        console.log(hitTestObject(enemyPlane, planeInfo));
       })
+    }
+
+    onMounted(() => {
+      game.ticker.add(handleTicker)
+    })
+    onUnmounted(() => {
+      game.ticker.remove(handleTicker)
     })
     return {
       planeInfo,

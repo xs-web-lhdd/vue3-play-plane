@@ -10,9 +10,9 @@ export const hitTestObject = (objA, objB) => {
   // 取反
   // 得出碰撞上的结果
   return (
-    objA.x + objA.width > objB.x &&
-    objA.x < objB.x + objB.width &&
-    objA.y + objA.height > objB.y &&
-    objA.y < objB.y + objB.height
+    objA.x + objA.width >= objB.x &&
+    objB.x + objB.width >= objA.x &&
+    objA.y + objA.height >= objB.y &&
+    objB.y + objB.height >= objA.y
   );
 }

@@ -8,6 +8,7 @@ import {
 
 import startPage from './page/StartPage'
 import gamePage from './page/GamePage'
+import endPage from './page/EndPage'
 
 // import Circle from './components/Circle'
 
@@ -37,6 +38,8 @@ export default defineComponent({
         return startPage
       } else if (currentPageName.value === 'GamePage') {
         return gamePage
+      } else if (currentPageName.value === 'EndPage') {
+        return endPage
       }
     })
     return {
