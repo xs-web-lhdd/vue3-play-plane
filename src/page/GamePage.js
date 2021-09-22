@@ -82,6 +82,54 @@ function useBullets() {
   }
 }
 
+// 整个战斗逻辑：
+function useFighting({
+  enemyPlanes,
+  bullets,
+  planeInfo,
+  context
+}) {
+  const handleTicker = () => {
+    // 敌方飞机移动：
+    enemyPlanes.forEach(enemyPlane => {
+      enemyPlane.y++
+    })
+
+    // 子弹移动：
+    bullets.forEach(bullet => {
+      bullet.y--
+    })
+
+    // 碰撞检测的算法： 矩形碰撞
+    // 我方飞机与敌方飞机碰撞：
+    enemyPlanes.forEach(enemyPlane => {
+      if (hitTestObject(enemyPlane, planeInfo)) {
+        console.log('完蛋了，碰到上了');
+        // 游戏结束：
+        context.emit('changePage', 'EndPage')
+      }
+    })
+    // 我方子弹与敌方飞机碰撞：
+    bullets.forEach((bulletInfo, bulletIndex) => {
+      enemyPlanes.forEach((enemyPlane, enemyIndex) => {
+        if (hitTestObject(bulletInfo, enemyPlane)) {
+          console.log('击中敌方飞机');
+          // 我方子弹消失-敌方飞机消失：
+          bullets.splice(bulletIndex, 1)
+          enemyPlanes.splice(enemyIndex, 1)
+        }
+      })
+    })
+  }
+
+  onMounted(() => {
+    game.ticker.add(handleTicker)
+  })
+  onUnmounted(() => {
+    game.ticker.remove(handleTicker)
+  })
+}
+
 export default defineComponent({
   setup(props, context) {
     // 我方飞机：
@@ -105,46 +153,12 @@ export default defineComponent({
       bulletInfo.height = 99
       addBullet(bulletInfo)
     }
-
-    // 飞机移动逻辑：
-    const handleTicker = () => {
-      // 敌方飞机移动：
-      enemyPlanes.forEach(enemyPlane => {
-        enemyPlane.y++
-      })
-
-      // 子弹移动：
-      bullets.forEach(bullet => {
-        bullet.y--
-      })
-
-      // 碰撞检测的算法： 矩形碰撞
-      // 我方飞机与敌方飞机碰撞：
-      enemyPlanes.forEach(enemyPlane => {
-        if (hitTestObject(enemyPlane, planeInfo)) {
-          console.log('完蛋了，碰到上了');
-          // 游戏结束：
-          context.emit('changePage', 'EndPage')
-        }
-      })
-      // 我方子弹与敌方飞机碰撞：
-      bullets.forEach((bulletInfo, bulletIndex) => {
-        enemyPlanes.forEach((enemyPlane, enemyIndex) => {
-          if (hitTestObject(bulletInfo, enemyPlane)) {
-            console.log('击中敌方飞机');
-            // 我方子弹消失-敌方飞机消失：
-            bullets.splice(bulletIndex, 1)
-            enemyPlanes.splice(enemyPlane, 1)
-          }
-        })
-      })
-    }
-
-    onMounted(() => {
-      game.ticker.add(handleTicker)
-    })
-    onUnmounted(() => {
-      game.ticker.remove(handleTicker)
+    // 战斗逻辑：
+    useFighting({
+      enemyPlanes,
+      bullets,
+      planeInfo,
+      context
     })
     return {
       planeInfo,
