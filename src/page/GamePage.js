@@ -3,7 +3,8 @@ import {
   defineComponent,
   reactive,
   onUnmounted,
-  onMounted
+  onMounted,
+  withCtx
 } from '@vue/runtime-core'
 // map：
 import Map from '../components/Map'
@@ -15,6 +16,7 @@ import {
 import {
   hitTestObject
 } from '../utils/index'
+import Bullet from '../components/Bullet'
 
 // 我方飞机：
 function useCreatePlane() {
@@ -79,6 +81,16 @@ export default defineComponent({
       enemyPlanes
     } = useEnemyPlane()
 
+    // 我方发射子弹：
+    const bullets = reactive([{
+      x: 50,
+      y: 50
+    }])
+    // 侦听发射子弹按钮：
+    const onAttack = (bulletInfo) => {
+      bullets.push(bulletInfo)
+    }
+
     // 飞机移动逻辑：
     const handleTicker = () => {
       // 敌方飞机移动：
@@ -103,7 +115,9 @@ export default defineComponent({
     })
     return {
       planeInfo,
-      enemyPlanes
+      enemyPlanes,
+      bullets,
+      onAttack
     }
   },
   render(context) {
@@ -116,10 +130,24 @@ export default defineComponent({
         })
       })
     }
+
+
+    // 我方子弹：
+    const createPlaneBullet = () => {
+      return context.bullets.map(bullet => {
+        return h(Bullet, {
+          x: bullet.x,
+          y: bullet.y
+        })
+      })
+    }
+
+
     // 地图，飞机
     return h('Container', [h(Map), h(Plane, {
       x: context.planeInfo.x,
-      y: context.planeInfo.y
-    }), ...createEnemyPlane()])
+      y: context.planeInfo.y,
+      onAttack: context.onAttack
+    }), ...createEnemyPlane(), ...createPlaneBullet()])
   }
 })

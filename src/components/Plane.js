@@ -37,6 +37,18 @@ export default defineComponent({
     //   x: props.x,
     //   y: props.y
     // }
+
+    // 按下空格键发射子弹：
+    window.addEventListener('keydown', function (e) {
+      if (e.code === 'Space') {
+        console.log('要发射子弹咯！');
+        // 子弹初始坐标跟飞机当前坐标一致：
+        context.emit('attack', {
+          x: x.value + 100,
+          y: y.value
+        })
+      }
+    })
     return {
       x,
       y
