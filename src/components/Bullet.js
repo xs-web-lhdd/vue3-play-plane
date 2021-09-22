@@ -7,15 +7,27 @@
 import {
   h,
   defineComponent,
-  watch,
-  reactive,
   toRefs
 } from '@vue/runtime-core'
-import bulletImg from '../assets/bunny-self.png'
+import bunnyImagePath from '../assets/bunny-self.png'
+import bunnySelfImagePath from '../assets/bunny.png'
 
-
+// 我方子弹信息：
+export const SelfBulletInfo = {
+  width: 61,
+  height: 99,
+  rotation: 0,
+  dir: -1,
+};
+// 敌方子弹信息：
+export const EnemyBulletInfo = {
+  width: 61,
+  height: 99,
+  rotation: 0,
+  dir: 1,
+};
 export default defineComponent({
-  props: ['x', 'y'],
+  props: ['x', 'y', 'id', 'rotation', 'dir'],
   setup(props, context) {
     const {
       x,
@@ -23,17 +35,18 @@ export default defineComponent({
     } = toRefs(props)
     return {
       x,
-      y
+      y,
+      rotation: props.rotation,
+      dir: props.dir
     }
   },
-  render(context) {
-    return h('Container', {
-      x: context.x,
-      y: context.y
-    }, [
-      h('Sprite', {
-        texture: bulletImg
-      })
-    ])
+  render(ctx) {
+    return h("Sprite", {
+      x: ctx.x,
+      y: ctx.y,
+      rotation: ctx.rotation,
+      // 根据不同 dir 渲染出不同子弹
+      texture: ctx.dir === 1 ? bunnyImagePath : bunnySelfImagePath
+    });
   }
 })

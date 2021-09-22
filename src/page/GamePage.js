@@ -7,7 +7,9 @@ import {
 } from '@vue/runtime-core'
 // map：
 import Map from '../components/Map'
+// 我方飞机：
 import Plane from '../components/Plane'
+// 敌方飞机：
 import EnemyPlane from '../components/EnemyPlane'
 import {
   game
@@ -15,7 +17,10 @@ import {
 import {
   hitTestObject
 } from '../utils/index'
+// 子弹：
 import Bullet from '../components/Bullet'
+// 敌军子弹信息：
+import EnemyBulletInfo from '../components/Bullet'
 
 // 我方飞机：
 function useCreatePlane() {
@@ -129,6 +134,39 @@ function useFighting({
   })
 }
 
+// 自增长给子弹编号：
+let hashCode = 0;
+const createHashCode = () => {
+  return hashCode++;
+};
+// 敌方子弹逻辑：
+const useEnemyPlaneBullets = () => {
+  // 存放敌方子弹的数组：
+  const enemyPlaneBullets = reactive([]);
+  // 创建敌军子弹：
+  const createEnemyPlaneBullet = (x, y) => {
+    const id = createHashCode();
+    const width = EnemyBulletInfo.width;
+    const height = EnemyBulletInfo.height;
+    const rotation = EnemyBulletInfo.rotation;
+    const dir = EnemyBulletInfo.dir;
+    enemyPlaneBullets.push({
+      x,
+      y,
+      id,
+      width,
+      height,
+      rotation,
+      dir
+    });
+  };
+
+  return {
+    enemyPlaneBullets,
+    createEnemyPlaneBullet,
+  };
+};
+
 export default defineComponent({
   setup(props, context) {
     // 我方飞机：
@@ -150,8 +188,14 @@ export default defineComponent({
     const onAttack = (bulletInfo) => {
       bulletInfo.width = 61
       bulletInfo.height = 99
+      bulletInfo.dir = -1
       addBullet(bulletInfo)
+      console.log(1111);
     }
+    const {
+      enemyPlaneBullets,
+      createEnemyPlaneBullet,
+    } = useEnemyPlaneBullets();
     // 战斗逻辑：
     useFighting({
       enemyPlanes,
@@ -163,7 +207,9 @@ export default defineComponent({
       planeInfo,
       enemyPlanes,
       bullets,
-      onAttack
+      onAttack,
+      enemyPlaneBullets,
+      createEnemyPlaneBullet,
     }
   },
   render(context) {
@@ -172,28 +218,60 @@ export default defineComponent({
       return context.enemyPlanes.map(enemyPlane => {
         return h(EnemyPlane, {
           x: enemyPlane.x,
-          y: enemyPlane.y
+          y: enemyPlane.y,
+          onAttack({
+            x,
+            y
+          }) {
+            context.createEnemyPlaneBullet(x, y)
+          }
         })
       })
     }
 
 
-    // 我方子弹：
-    const createPlaneBullet = () => {
-      return context.bullets.map(bullet => {
-        return h(Bullet, {
-          x: bullet.x,
-          y: bullet.y
-        })
+    // // 我方子弹：
+    // const createPlaneBullet = () => {
+    //   return context.bullets.map(bullet => {
+    //     return h(Bullet, {
+    //       x: bullet.x,
+    //       y: bullet.y
+    //     })
+    //   })
+    // }
+    // 子弹：
+    const createBullet = (info, index) => {
+      // console.log(info);
+      return h(Bullet, {
+        key: "Bullet" + info.id,
+        x: info.x,
+        y: info.y,
+        id: info.id,
+        width: info.width,
+        height: info.height,
+        rotation: info.rotation,
+        dir: info.dir,
+        onDestroy({
+          id
+        }) {
+          context.destroySelfBullet(id);
+        },
+      });
+    };
+    const createSelfPlane = () => {
+      return h(Plane, {
+        x: context.planeInfo.x,
+        y: context.planeInfo.y,
+        onAttack: context.onAttack
       })
     }
-
 
     // 地图，飞机
-    return h('Container', [h(Map), h(Plane, {
-      x: context.planeInfo.x,
-      y: context.planeInfo.y,
-      onAttack: context.onAttack
-    }), ...createEnemyPlane(), ...createPlaneBullet()])
+    return h('Container', [h(Map),
+      createSelfPlane(),
+      ...createEnemyPlane(),
+      // ...createPlaneBullet(),
+      ...context.enemyPlaneBullets.map(createBullet)
+    ])
   }
 })
